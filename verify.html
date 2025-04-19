@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+</head>
+<body>
+  <form action="/" method="POST">
+    <div class="cf-turnstile" data-sitekey="0x4AAAAAABPN80s_K5J6Saj3"></div>
+    <button type="submit">验证</button>
+  </form>
+  <script>
+    document.querySelector("form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const token = document.querySelector(".cf-turnstile iframe").getAttribute("data-token");
+      const res = await fetch("/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token }),
+      });
+      if (res.ok) location.reload();
+    });
+  </script>
+</body>
+</html>
