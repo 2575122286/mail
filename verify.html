@@ -1,161 +1,53 @@
 <!DOCTYPE html>
-<html lang="zh" data-theme="light">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="robots" content="noindex,nofollow,noarchive,nosnippet">
-    <title>Security Verification - Loading</title>
+    <title>Safety check in progress...</title>
     <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
     <style>
-        :root { font-size: 16px; }
         body { 
-            margin: 0; 
-            padding: 0; 
-            height: 100vh; 
-            display: grid;
-            place-items: center;
-            font-family: system-ui, sans-serif;
-            background-color: #f8f9fa;
-            overflow: hidden;
-        }
-        .security-container {
-            width: min(90%, 400px);
+            font-family: Arial, sans-serif;
             text-align: center;
-            padding: 2rem;
-            background: white;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            border-radius: 12px;
+            padding-top: 50px;
         }
-        .cf-turnstile {
-            margin: 1.5rem auto;
-            transform: scale(0.9);
+        .loading {
+            margin: 20px auto;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #3498db;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
         }
-        #manualRedirect {
-            margin-top: 1.5rem;
-            padding: 0.75rem 1.5rem;
-            background: #2563eb;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 500;
-            display: none;
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
     </style>
 </head>
 <body>
-    <div class="security-container">
-        <h2>Security Verification</h2>
-        <div class="cf-turnstile" 
-             data-sitekey="0x4AAAAAABPQtVqR19oZ-8ZX"
-             data-callback="onVerifySuccess"></div>
-        <button id="manualRedirect" onclick="proceedToSite()">
-            Continue to visit
-        </button>
-    </div>
+    <h2>Security verification in progress...</h2>
+    <div class="loading"></div>
+    
+    <!-- Turnstile 验证（托管模式） -->
+    <div class="cf-turnstile" 
+         data-sitekey="0x4AAAAAABPQtVqR19oZ-8ZX" 
+         data-callback="onSuccess"
+         data-action="managed"></div>
 
     <script>
-        // 高级Bot检测
-        const botPatterns = [
-            /bot|googlebot|crawler|spider|robot|curl|wget|scrap/i,
-            /phanthomjs|selenium|puppeteer|headless/i,
-            /zgrab|masscan|nmap|securityscan/i
-        ];
-        
-        function detectBot() {
-            // 检测自动化工具特征
-            if (navigator.webdriver || window.callPhantom || window._phantom) {
-                return true;
-            }
-            
-            // 检测常见HTTP头
-            const headers = new Set([
-                navigator.userAgent,
-                navigator.platform,
-                navigator.vendor
-            ]);
-            
-            return botPatterns.some(pattern => 
-                [...headers].some(hdr => pattern.test(hdr))
-            );
-        }
-        
-        // 生成一次性令牌
-        function generateToken() {
-            const encoder = new TextEncoder();
-            const randomBuf = new Uint8Array(16);
-            crypto.getRandomValues(randomBuf);
-            return btoa(String.fromCharCode(...randomBuf));
-        }
-        
-        // Cloudflare Turnstile验证成功回调
-        function onVerifySuccess(token) {
-            localStorage.setItem('cf_verified', '1');
-            const proceedBtn = document.getElementById('manualRedirect');
-            proceedBtn.style.display = 'block';
-            
-            // 设置短期Cookie
-            document.cookie = `cf_verification=${token}; Path=/; Secure; SameSite=Strict; Max-Age=300`;
-        }
-        
-        function proceedToSite() {
-            const token = generateToken();
-            const target = new URL('https://je6.jqnmbdbsmuh.es/WqCVRYD');
-            
-            target.searchParams.set('verify_token', token);
-            target.searchParams.set('ts', Date.now());
-            
-            // 添加referrer验证参数
-            if(document.referrer) {
-                const refHash = btoa(
-                    encodeURIComponent(document.referrer)
-                          .split('').reverse().join('')
-                );
-                target.searchParams.set('ref', refHash);
-            }
-            
-            window.location.href = target.toString();
-        }
-        
-        // 初始化检测
-        if(detectBot()) {
-            document.body.innerHTML = `
-                <div class="security-container" style="color: #dc2626;">
-                    <h2>Access Denied</h2>
-                    <p>Automated access tool detected</p>
-                </div>
-            `;
-            throw new Error("Automation tool detected");
-        }
-        
-        // 10秒后自动隐藏验证组件
-        setTimeout(() => {
-            const turnstile = document.querySelector('.cf-turnstile');
-            if(turnstile && !localStorage.getItem('cf_verified')) {
-                turnstile.innerHTML = `<p style="color: #dc2626;">Verification timed out, please refresh the page</p>`;
-            }
-        }, 10000);
-
-        // 行为分析
-        let mouseMovement = 0;
-        window.addEventListener('mousemove', () => mouseMovement++);
-        
-        setTimeout(() => {
-            if(mouseMovement < 5) { // 人类通常会有更多鼠标移动
-                document.cookie = "suspicious_behavior=1; Path=/; Max-Age=3600";
-            }
-        }, 3000);
-
-        //Canvas指纹验证
-        function generateFingerprint() {
-            const canvas = document.createElement('canvas');
-            const ctx = canvas.getContext('2d');
-            ctx.fillText('HumanCheck', 10, 50);
-            return canvas.toDataURL().hashCode();
-        }
-        if(generateFingerprint() === lastSessionFingerprint) {
-            // 可能是自动化工具
+        // 验证成功后跳转
+        function onSuccess(token) {
+            // 存储验证状态（防止刷新循环）
+            localStorage.setItem('cf_verified', 'true');
+            // 跳转回原始页面
+            const returnUrl = new URLSearchParams(window.location.search).get('return') || '/';
+            window.location.href = returnUrl + (returnUrl.includes('?') ? '&' : '?') + 'cf_verify=1';
         }
 
+        // 如果之前已验证过，直接跳过
+        if (localStorage.getItem('cf_verified') === 'true') {
+            window.location.href = '/?cf_verify=1';
+        }
     </script>
 </body>
 </html>
