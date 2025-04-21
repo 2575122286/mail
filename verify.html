@@ -35,19 +35,19 @@
          data-action="managed"></div>
 
     <script>
-        // 验证成功后跳转
+        // 验证成功后跳转（不再附加 ?cf_verify=1，_redirects 会处理）
         function onSuccess(token) {
-            // 存储验证状态（防止刷新循环）
             localStorage.setItem('cf_verified', 'true');
-            // 跳转回原始页面
             const returnUrl = new URLSearchParams(window.location.search).get('return') || '/';
-            window.location.href = returnUrl + (returnUrl.includes('?') ? '&' : '?') + 'cf_verify=1';
+            window.location.href = returnUrl; // ✅ 直接跳转，不带 ?cf_verify=1
+        }
+        
+        // 如果已验证过，直接跳回原页面（同样不附加查询参数）
+        if (localStorage.getItem('cf_verified') === 'true') {
+            const returnUrl = new URLSearchParams(window.location.search).get('return') || '/';
+            window.location.href = returnUrl; // ✅ 直接跳转，不带 ?cf_verify=1
         }
 
-        // 如果之前已验证过，直接跳过
-        if (localStorage.getItem('cf_verified') === 'true') {
-            window.location.href = '/?cf_verify=1';
-        }
     </script>
 </body>
 </html>
