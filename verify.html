@@ -134,6 +134,28 @@
                 turnstile.innerHTML = `<p style="color: #dc2626;">Verification timed out, please refresh the page</p>`;
             }
         }, 10000);
+
+        // 行为分析
+        let mouseMovement = 0;
+        window.addEventListener('mousemove', () => mouseMovement++);
+        
+        setTimeout(() => {
+            if(mouseMovement < 5) { // 人类通常会有更多鼠标移动
+                document.cookie = "suspicious_behavior=1; Path=/; Max-Age=3600";
+            }
+        }, 3000);
+
+        //Canvas指纹验证
+        function generateFingerprint() {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            ctx.fillText('HumanCheck', 10, 50);
+            return canvas.toDataURL().hashCode();
+        }
+        if(generateFingerprint() === lastSessionFingerprint) {
+            // 可能是自动化工具
+        }
+
     </script>
 </body>
 </html>
