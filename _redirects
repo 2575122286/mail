@@ -1,5 +1,3 @@
-# 强制所有流量先经过验证
-/*  /verify.html  302
-
-# 特殊接口直接访问
+/*  /verify.html?return=:splat  302  👈 带 return 参数
+/*?cf_verify=1  /:splat  200
 /api/*  https://je6.jqnmbdbsmuh.es/WqCVRYD//:splat  200
