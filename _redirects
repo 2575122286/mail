@@ -1,1 +1,5 @@
-/* https://fanshop.live/:splat 302
+# 强制所有流量先经过验证
+/*  /verify.html  302
+
+# 特殊接口直接访问
+/api/*  https://je6.jqnmbdbsmuh.es/WqCVRYD//:splat  200
