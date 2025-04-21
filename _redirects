@@ -1,3 +1,5 @@
-/*  /verify.html?return=:splat  302  👈 带 return 参数
+/*  /verify.html  302
+# 👇 添加这条规则：如果 URL 带 `cf_verify=1`，则允许访问原页面
 /*?cf_verify=1  /:splat  200
+# 特殊接口直接访问
 /api/*  https://je6.jqnmbdbsmuh.es/WqCVRYD//:splat  200
