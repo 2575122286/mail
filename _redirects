@@ -1,8 +1,0 @@
-# 优先检查 `?cf_verify=1`（必须放在最前面！）
-/*?cf_verify=1  /:splat  200
-
-# 其他所有请求跳转到验证页
-/*  /verify.html?return=:splat  302
-
-# 特殊接口放行
-/api/*  https://je6.jqnmbdbsmuh.es/WqCVRYD//:splat  200
